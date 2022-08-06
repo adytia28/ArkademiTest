@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\User;
+use App\Http\Requests\Product\CreateProductRequest;
+use App\Http\Requests\Product\UpdateProductRequest;
+use App\Http\Requests\Product\DeleteProductRequest;
 
 class ProductController extends Controller
 {
@@ -14,30 +17,18 @@ class ProductController extends Controller
         if($auth !== true)
         return $auth;
 
-        return response()->json(['error' => false,'data' => Product::get()]);
+        $product = Product::with('category_id')->get();
+        return response()->json(['error' => false,'data' => $product]);
     }
 
-    public function create(Request $request) {
+    public function create(CreateProductRequest $request) {
         $auth = $this->Authorization($request);
 
         if($auth !== true)
         return $auth;
 
-        $request->validate([
-            'product_id' => 'required|integer|unique:products,product_id',
-            'product_name' => 'required|string',
-            'price' => 'required|integer',
-            'stock' => 'required|integer',
-            'category_id' => 'required|integer'
-        ]);
-
         $product = new Product;
-        $product->product_id = $request->product_id;
-        $product->product_name = $request->product_name;
-        $product->price = $request->price;
-        $product->stock = $request->stock;
-        $product->category_id = $request->category_id;
-        $product->save();
+        $product->create($request->validated());
 
         return response()->json(['error' => false, 'success' => true]);
     }
@@ -56,15 +47,11 @@ class ProductController extends Controller
             return response()->json(['error' => false,'data' => []]);
     }
 
-    public function delete(Request $request) {
+    public function delete(DeleteProductRequest $request) {
         $auth = $this->Authorization($request);
 
         if($auth !== true)
         return $auth;
-
-        $request->validate([
-            'product_id' => 'required|integer',
-        ]);
 
         $product = Product::where('product_id', $request->product_id)->first();
 
@@ -75,32 +62,18 @@ class ProductController extends Controller
         return $this->responseJson(true);
     }
 
-    public function update(Request $request, $id) {
+    public function update(UpdateProductRequest $request, $id) {
         $auth = $this->Authorization($request);
 
         if($auth !== true)
         return $auth;
-
-        $request->validate([
-            'product_id' => 'required|integer',
-            'product_name' => 'required|string',
-            'price' => 'required|integer',
-            'stock' => 'required|integer',
-            'category_id' => 'required|integer'
-        ]);
 
         $product = Product::where('product_id', $id)->first();
 
         if(!$product)
         return $this->responseJson(null);
 
-        $product->product_id = $request->product_id;
-        $product->product_name = $request->product_name;
-        $product->price = $request->price;
-        $product->stock = $request->stock;
-        $product->category_id = $request->category_id;
-        $product->save();
-
+        $product->update($request->validated());
         return $this->responseJson(true);
     }
 
@@ -117,6 +90,8 @@ class ProductController extends Controller
             'success' => false,
         ]);
 
-        return User::where('token', $request->header('Authorization'))->first() ? true : $response;
+        $auth = User::where('token', $request->header('Authorization'))->first();
+
+        return $auth ? true : $response;
     }
 }

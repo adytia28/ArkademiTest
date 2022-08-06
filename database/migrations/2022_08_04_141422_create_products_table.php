@@ -19,7 +19,6 @@ class CreateProductsTable extends Migration
             $table->bigInteger('price');
             $table->integer('stock');
             $table->foreignId('category_id');
-            $table->timestamps();
         });
     }
 

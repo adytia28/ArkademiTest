@@ -27,3 +27,4 @@ Route::post('/testapi/delete', [ProductController::class, 'delete']);
 Route::post('/testapi/update/{id}', [ProductController::class, 'update']);
 
 
+

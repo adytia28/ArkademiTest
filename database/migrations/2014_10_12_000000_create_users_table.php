@@ -19,7 +19,6 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->longtext('token')->unique()->nullable();
             $table->integer('user_level');
-            $table->timestamps();
         });
     }
 
